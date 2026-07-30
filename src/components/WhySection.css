@@ -1,0 +1,96 @@
+.why-section {
+  padding: 6rem 0;
+  background-color: var(--color-bg-alt);
+}
+
+.why-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.why-title {
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+.why-points {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.why-point {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.why-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: var(--color-white);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: var(--color-accent);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  flex-shrink: 0;
+}
+
+.why-point p {
+  font-size: 1.1rem;
+}
+
+.why-quote-area {
+  padding: 4rem;
+  background-color: var(--color-white);
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+  position: relative;
+}
+
+.why-quote {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  line-height: 1.4;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.quote-mark {
+  position: absolute;
+  top: -2rem;
+  left: -1rem;
+  font-size: 6rem;
+  font-family: var(--font-serif);
+  color: var(--color-bg-alt);
+  z-index: -1;
+  line-height: 1;
+}
+
+.why-attribution {
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 992px) {
+  .why-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .why-quote-area {
+    padding: 2rem;
+  }
+  .why-quote {
+    font-size: 1.5rem;
+  }
+}
