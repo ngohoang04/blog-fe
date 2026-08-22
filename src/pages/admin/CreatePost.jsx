@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef, useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 import { AuthContext } from '../../context/AuthContext';
-import { FiArrowLeft, FiSave, FiCheck } from 'react-icons/fi';
+import { FiArrowLeft, FiSave, FiCheck, FiImage, FiX } from 'react-icons/fi';
 import api from '../../api/axios';
 import './CreatePost.css';
 
@@ -12,6 +12,7 @@ const CreatePost = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useContext(AuthContext);
   const isEditing = !!id;
+  const quillRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -19,11 +20,14 @@ const CreatePost = () => {
     category: 'Culture',
     status: 'draft',
     readTime: 5,
-    excerpt: ''
+    excerpt: '',
+    thumbnail: ''
   });
   
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [thumbnailPreview, setThumbnailPreview] = useState('');
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -36,6 +40,9 @@ const CreatePost = () => {
         try {
           const res = await api.get(`/posts/${id}`);
           setFormData(res.data);
+          if (res.data.thumbnail) {
+            setThumbnailPreview(res.data.thumbnail);
+          }
         } catch (err) {
           console.error('Failed to fetch post', err);
         } finally {
@@ -45,6 +52,84 @@ const CreatePost = () => {
       fetchPost();
     }
   }, [id, isAuthenticated, navigate]);
+
+  // Upload image to server/cloudinary
+  const uploadImage = async (file) => {
+    const formDataUpload = new FormData();
+    formDataUpload.append('image', file);
+    const res = await api.post('/upload', formDataUpload, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return res.data.url;
+  };
+
+  // Handle thumbnail upload
+  const handleThumbnailUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      setFormData(prev => ({ ...prev, thumbnail: url }));
+      setThumbnailPreview(url);
+    } catch (err) {
+      console.error('Failed to upload thumbnail', err);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Remove thumbnail
+  const removeThumbnail = () => {
+    setFormData(prev => ({ ...prev, thumbnail: '' }));
+    setThumbnailPreview('');
+  };
+
+  // Quill image handler — insert image into editor content
+  const imageHandler = () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+
+      try {
+        const url = await uploadImage(file);
+        const quill = quillRef.current?.getEditor();
+        if (quill) {
+          const range = quill.getSelection(true);
+          quill.insertEmbed(range.index, 'image', url);
+          quill.setSelection(range.index + 1);
+        }
+      } catch (err) {
+        console.error('Failed to upload image', err);
+        alert('Failed to upload image.');
+      }
+    };
+  };
+
+  // Quill modules with custom image handler
+  const modules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['blockquote', 'code-block'],
+        ['link', 'image'],
+        [{ align: [] }],
+        ['clean']
+      ],
+      handlers: {
+        image: imageHandler
+      }
+    }
+  }), []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -118,9 +203,11 @@ const CreatePost = () => {
             <div className="form-group editor-container">
               <label>Content</label>
               <ReactQuill 
+                ref={quillRef}
                 theme="snow" 
                 value={formData.content} 
                 onChange={handleContentChange} 
+                modules={modules}
                 className="quill-editor"
               />
             </div>
@@ -129,6 +216,43 @@ const CreatePost = () => {
           <div className="editor-sidebar">
             <div className="settings-panel">
               <h3>Post Settings</h3>
+
+              {/* Thumbnail Upload */}
+              <div className="form-group">
+                <label>Thumbnail</label>
+                {thumbnailPreview ? (
+                  <div className="thumbnail-preview">
+                    <img src={thumbnailPreview} alt="Thumbnail preview" />
+                    <button 
+                      type="button" 
+                      className="remove-thumbnail-btn" 
+                      onClick={removeThumbnail}
+                      title="Remove thumbnail"
+                    >
+                      <FiX />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="upload-area">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleThumbnailUpload}
+                      style={{ display: 'none' }}
+                    />
+                    <div className="upload-placeholder">
+                      {uploading ? (
+                        <span>Uploading...</span>
+                      ) : (
+                        <>
+                          <FiImage size={24} />
+                          <span>Click to upload thumbnail</span>
+                        </>
+                      )}
+                    </div>
+                  </label>
+                )}
+              </div>
               
               <div className="form-group">
                 <label>Category</label>

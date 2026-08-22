@@ -111,10 +111,18 @@ const translations = {
     storyDetail: {
       by: 'By',
       comments: 'Comments',
-      leaveComment: 'Leave a comment...',
+      leaveComment: 'Write a comment...',
+      leaveCommentGuest: 'Write a comment as a guest...',
       postComment: 'Post Comment',
+      posting: 'Posting...',
       loading: 'Loading story...',
       notFound: 'Story not found.',
+      yourName: 'Your name *',
+      yourEmail: 'Your email (optional)',
+      commentRequired: 'Please write a comment.',
+      nameRequired: 'Please enter your name.',
+      commentFailed: 'Failed to post comment. Please try again.',
+      noComments: 'No comments yet. Be the first to comment!',
     },
 
     // About Page
@@ -266,9 +274,17 @@ const translations = {
       by: 'Bởi',
       comments: 'Bình luận',
       leaveComment: 'Viết bình luận...',
+      leaveCommentGuest: 'Viết bình luận với tư cách khách...',
       postComment: 'Gửi bình luận',
+      posting: 'Đang gửi...',
       loading: 'Đang tải bài viết...',
       notFound: 'Không tìm thấy bài viết.',
+      yourName: 'Tên của bạn *',
+      yourEmail: 'Email (không bắt buộc)',
+      commentRequired: 'Vui lòng viết nội dung bình luận.',
+      nameRequired: 'Vui lòng nhập tên của bạn.',
+      commentFailed: 'Gửi bình luận thất bại. Vui lòng thử lại.',
+      noComments: 'Chưa có bình luận nào. Hãy là người đầu tiên!',
     },
 
     // About Page
