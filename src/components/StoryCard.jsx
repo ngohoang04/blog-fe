@@ -24,9 +24,11 @@ const StoryCard = ({ story }) => {
   return (
     <Link to={`/stories/${story.slug}`} className="story-card">
       <div className="story-image-wrapper">
-        <div className="story-image-placeholder">
-           {/* Fallback image placeholder */}
-        </div>
+        {story.thumbnail ? (
+          <img src={story.thumbnail} alt={story.title} className="story-image" />
+        ) : (
+          <div className="story-image-placeholder"></div>
+        )}
       </div>
       <div className="story-content">
         <span className="story-category">{getCategoryName()}</span>

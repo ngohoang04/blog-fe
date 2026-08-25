@@ -38,7 +38,7 @@ const CreatePost = () => {
     if (isEditing) {
       const fetchPost = async () => {
         try {
-          const res = await api.get(`/posts/${id}`);
+          const res = await api.get(`/posts/id/${id}`);
           setFormData(res.data);
           if (res.data.thumbnail) {
             setThumbnailPreview(res.data.thumbnail);
@@ -57,9 +57,7 @@ const CreatePost = () => {
   const uploadImage = async (file) => {
     const formDataUpload = new FormData();
     formDataUpload.append('image', file);
-    const res = await api.post('/upload', formDataUpload, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    const res = await api.post('/upload', formDataUpload);
     return res.data.url;
   };
 
@@ -141,7 +139,17 @@ const CreatePost = () => {
 
   const handleSave = async (status) => {
     setSaving(true);
-    const payload = { ...formData, status };
+    const payload = {
+      title: formData.title,
+      content: formData.content,
+      excerpt: formData.excerpt,
+      thumbnail: formData.thumbnail,
+      category: formData.category,
+      readTime: formData.readTime,
+      status
+    };
+    
+    console.log('Saving post:', { isEditing, id, payload: { ...payload, content: payload.content?.substring(0, 50) + '...' } });
     
     try {
       if (isEditing) {
@@ -151,8 +159,8 @@ const CreatePost = () => {
       }
       navigate('/admin');
     } catch (err) {
-      console.error('Failed to save post', err);
-      alert('Failed to save post');
+      console.error('Failed to save post', err.response?.data || err.message);
+      alert('Failed to save: ' + (err.response?.data?.message || err.message));
     } finally {
       setSaving(false);
     }

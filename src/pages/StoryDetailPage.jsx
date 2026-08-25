@@ -26,12 +26,19 @@ const StoryDetailPage = () => {
       try {
         const res = await api.get(`/posts/${slug}`);
         setStory(res.data);
-        // Fetch comments for this post
+        
+        // Fetch comments separately — errors here should NOT affect the post display
         if (res.data && res.data.id) {
-          const commentsRes = await api.get(`/comments/post/${res.data.id}`);
-          setComments(commentsRes.data);
+          try {
+            const commentsRes = await api.get(`/comments/post/${res.data.id}`);
+            setComments(commentsRes.data);
+          } catch (commentErr) {
+            console.warn('Failed to load comments:', commentErr);
+            setComments([]);
+          }
         }
       } catch (err) {
+        console.error('Failed to load story:', err);
         setStory(null);
       } finally {
         setLoading(false);
