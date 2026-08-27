@@ -45,8 +45,16 @@
   border-left: 4px solid var(--color-accent);
 }
 
-.logout-btn {
+.home-link {
   margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.home-link:hover {
+  color: var(--color-white) !important;
+}
+
+.logout-btn {
   color: #ff6b6b;
 }
 
@@ -176,4 +184,30 @@
 
 .action-btn:hover {
   transform: translateY(-2px);
+}
+
+/* Comment filter buttons */
+.comment-filters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  background-color: #f0f0f0;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.filter-btn.active {
+  background-color: var(--color-accent, #007bff);
+  color: white;
+}
+
+.filter-btn:hover:not(.active) {
+  background-color: #e0e0e0;
 }

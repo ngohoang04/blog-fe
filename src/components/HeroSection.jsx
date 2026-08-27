@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
+import api from '../api/axios';
 import './HeroSection.css';
 
 const HeroSection = () => {
   const { t } = useLanguage();
+  const [heroImage, setHeroImage] = useState('');
+
+  useEffect(() => {
+    api.get('/settings').then(res => {
+      if (res.data.heroImage) setHeroImage(res.data.heroImage);
+    }).catch(() => {});
+  }, []);
 
   return (
     <section className="hero">
@@ -33,7 +41,11 @@ const HeroSection = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <div className="hero-image-placeholder"></div>
+          {heroImage ? (
+            <img src={heroImage} alt="Vietnam Decoded" className="hero-image" />
+          ) : (
+            <div className="hero-image-placeholder"></div>
+          )}
         </motion.div>
       </div>
     </section>

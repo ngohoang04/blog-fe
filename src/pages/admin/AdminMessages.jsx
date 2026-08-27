@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { FiLogOut, FiMail, FiCheckCircle, FiTrash2, FiClock } from 'react-icons/fi';
+import { FiLogOut, FiMail, FiCheckCircle, FiTrash2, FiClock, FiHome, FiMessageSquare, FiImage } from 'react-icons/fi';
 import api from '../../api/axios';
 import './Dashboard.css';
 import './AdminExtra.css';
@@ -58,12 +58,15 @@ const AdminMessages = () => {
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="sidebar-brand">
-          <h2>VD Admin</h2>
+          <h2>Admin</h2>
         </div>
         <nav className="sidebar-nav">
           <Link to="/admin">Posts</Link>
+          <Link to="/admin/comments"><FiMessageSquare /> Comments</Link>
           <Link to="/admin/projects">Projects</Link>
           <Link to="/admin/messages" className="active">Messages</Link>
+          <Link to="/admin/settings"><FiImage /> Ảnh trang chủ</Link>
+          <Link to="/" className="home-link"><FiHome /> Trang chủ</Link>
           <button className="logout-btn" onClick={logout}><FiLogOut /> Logout</button>
         </nav>
       </aside>
@@ -133,7 +136,7 @@ const AdminMessages = () => {
                   <p><strong>From:</strong> {selectedMsg.name}</p>
                   <p><strong>Email:</strong> <a href={`mailto:${selectedMsg.email}`}>{selectedMsg.email}</a></p>
                   <p><strong>Date:</strong> {formatDate(selectedMsg.createdAt)}</p>
-                  <p><strong>Status:</strong> 
+                  <p><strong>Status:</strong>
                     <span className={`status-badge ${selectedMsg.isRead ? 'published' : 'draft'}`} style={{ marginLeft: '0.5rem' }}>
                       {selectedMsg.isRead ? 'Read' : 'Unread'}
                     </span>

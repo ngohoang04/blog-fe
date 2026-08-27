@@ -54,6 +54,12 @@
   background: linear-gradient(135deg, #e0d8cc 0%, #c4a882 100%);
 }
 
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 @media (max-width: 992px) {
   .hero-container {
     grid-template-columns: 1fr;

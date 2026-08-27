@@ -21,13 +21,18 @@ const CreatePost = () => {
     status: 'draft',
     readTime: 5,
     excerpt: '',
-    thumbnail: ''
+    thumbnail: '',
+    originalLang: 'en',
+    titleAlt: '',
+    contentAlt: '',
+    excerptAlt: ''
   });
   
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState('');
+  const [languageTab, setLanguageTab] = useState('original'); // 'original' | 'translated'
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -85,7 +90,7 @@ const CreatePost = () => {
     setThumbnailPreview('');
   };
 
-  // Quill image handler — insert image into editor content
+  // Quill image handler — insert image with optional caption
   const imageHandler = () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
@@ -98,11 +103,24 @@ const CreatePost = () => {
 
       try {
         const url = await uploadImage(file);
+        const caption = prompt('Chú thích ảnh (để trống nếu không cần):') || '';
         const quill = quillRef.current?.getEditor();
         if (quill) {
           const range = quill.getSelection(true);
-          quill.insertEmbed(range.index, 'image', url);
-          quill.setSelection(range.index + 1);
+          
+          // Insert a newline before figure block
+          quill.insertText(range.index, '\n');
+          
+          // Build figure HTML
+          const figureHtml = caption
+            ? `<figure class="content-figure"><img src="${url}" alt="${caption}" /><figcaption>${caption}</figcaption></figure>`
+            : `<figure class="content-figure"><img src="${url}" alt="" /></figure>`;
+          
+          // Use clipboard to paste HTML at cursor
+          quill.clipboard.dangerouslyPasteHTML(range.index + 1, figureHtml);
+          
+          // Move cursor after the figure
+          quill.setSelection(range.index + 3);
         }
       } catch (err) {
         console.error('Failed to upload image', err);
@@ -134,7 +152,11 @@ const CreatePost = () => {
   };
 
   const handleContentChange = (content) => {
-    setFormData({ ...formData, content });
+    if (languageTab === 'original') {
+      setFormData({ ...formData, content });
+    } else {
+      setFormData({ ...formData, contentAlt: content });
+    }
   };
 
   const handleSave = async (status) => {
@@ -146,7 +168,11 @@ const CreatePost = () => {
       thumbnail: formData.thumbnail,
       category: formData.category,
       readTime: formData.readTime,
-      status
+      status,
+      originalLang: formData.originalLang,
+      titleAlt: formData.titleAlt,
+      contentAlt: formData.contentAlt,
+      excerptAlt: formData.excerptAlt
     };
     
     console.log('Saving post:', { isEditing, id, payload: { ...payload, content: payload.content?.substring(0, 50) + '...' } });
@@ -161,6 +187,40 @@ const CreatePost = () => {
     } catch (err) {
       console.error('Failed to save post', err.response?.data || err.message);
       alert('Failed to save: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleTranslate = async () => {
+    if (!formData.title && !formData.content && !formData.excerpt) return;
+    
+    setSaving(true); // Re-use saving state for UI feedback
+    try {
+      const from = formData.originalLang;
+      const to = from === 'en' ? 'vi' : 'en';
+      
+      const res = await api.post('/translate', {
+        text: {
+          title: formData.title,
+          content: formData.content,
+          excerpt: formData.excerpt
+        },
+        from,
+        to
+      });
+      
+      const translated = res.data.translatedText || {};
+      setFormData(prev => ({
+        ...prev,
+        titleAlt: translated.title || '',
+        contentAlt: translated.content || '',
+        excerptAlt: translated.excerpt || ''
+      }));
+      alert('Dịch thành công!');
+    } catch (err) {
+      console.error('Translation failed', err);
+      alert('Lỗi khi tự động dịch: ' + (err.response?.data?.message || err.message));
     } finally {
       setSaving(false);
     }
@@ -196,12 +256,37 @@ const CreatePost = () => {
 
         <div className="editor-layout">
           <div className="editor-main-content">
+            <div className="language-tabs" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', borderBottom: '1px solid #ddd', paddingBottom: '0.5rem' }}>
+              <button 
+                type="button"
+                onClick={() => setLanguageTab('original')}
+                style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: languageTab === 'original' ? 'bold' : 'normal', color: languageTab === 'original' ? '#000' : '#888', cursor: 'pointer' }}
+              >
+                Ngôn ngữ gốc ({formData.originalLang === 'en' ? 'EN' : 'VI'})
+              </button>
+              <button 
+                type="button"
+                onClick={() => setLanguageTab('translated')}
+                style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: languageTab === 'translated' ? 'bold' : 'normal', color: languageTab === 'translated' ? '#000' : '#888', cursor: 'pointer' }}
+              >
+                Bản dịch ({formData.originalLang === 'en' ? 'VI' : 'EN'})
+              </button>
+              <button 
+                type="button"
+                onClick={handleTranslate}
+                disabled={saving}
+                style={{ marginLeft: 'auto', background: '#3498db', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.3rem 0.8rem', cursor: 'pointer', opacity: saving ? 0.7 : 1 }}
+              >
+                {saving ? 'Đang dịch...' : '🔄 Tự động dịch'}
+              </button>
+            </div>
+
             <div className="form-group">
-              <label>Title</label>
+              <label>Title {languageTab === 'translated' ? '(Translated)' : ''}</label>
               <input 
                 type="text" 
-                name="title" 
-                value={formData.title} 
+                name={languageTab === 'original' ? 'title' : 'titleAlt'} 
+                value={languageTab === 'original' ? formData.title : formData.titleAlt} 
                 onChange={handleChange} 
                 placeholder="Post Title..."
                 className="title-input"
@@ -209,11 +294,11 @@ const CreatePost = () => {
             </div>
             
             <div className="form-group editor-container">
-              <label>Content</label>
+              <label>Content {languageTab === 'translated' ? '(Translated)' : ''}</label>
               <ReactQuill 
                 ref={quillRef}
                 theme="snow" 
-                value={formData.content} 
+                value={languageTab === 'original' ? formData.content : formData.contentAlt} 
                 onChange={handleContentChange} 
                 modules={modules}
                 className="quill-editor"
@@ -263,6 +348,14 @@ const CreatePost = () => {
               </div>
               
               <div className="form-group">
+                <label>Ngôn ngữ gốc</label>
+                <select name="originalLang" value={formData.originalLang} onChange={handleChange}>
+                  <option value="en">Tiếng Anh (EN)</option>
+                  <option value="vi">Tiếng Việt (VI)</option>
+                </select>
+              </div>
+
+              <div className="form-group">
                 <label>Category</label>
                 <select name="category" value={formData.category} onChange={handleChange}>
                   <option value="Brands">Brands</option>
@@ -284,10 +377,10 @@ const CreatePost = () => {
               </div>
               
               <div className="form-group">
-                <label>Excerpt</label>
+                <label>Excerpt {languageTab === 'translated' ? '(Translated)' : ''}</label>
                 <textarea 
-                  name="excerpt" 
-                  value={formData.excerpt} 
+                  name={languageTab === 'original' ? 'excerpt' : 'excerptAlt'} 
+                  value={languageTab === 'original' ? formData.excerpt : formData.excerptAlt} 
                   onChange={handleChange} 
                   rows="4"
                   placeholder="Brief summary for cards..."

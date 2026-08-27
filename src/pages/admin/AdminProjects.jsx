@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { FiPlus, FiEdit2, FiTrash2, FiLogOut, FiExternalLink } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiLogOut, FiExternalLink, FiHome, FiMessageSquare, FiImage } from 'react-icons/fi';
 import api from '../../api/axios';
 import './Dashboard.css';
 import './AdminExtra.css';
@@ -14,6 +14,24 @@ const AdminProjects = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ name: '', description: '', link: '', thumbnail: '', displayOrder: 0 });
   const [message, setMessage] = useState('');
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await api.post('/upload', formData);
+      setForm(prev => ({ ...prev, thumbnail: res.data.url }));
+    } catch (err) {
+      console.error('Upload failed', err);
+      alert('Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   useEffect(() => {
     if (isAuthenticated) fetchProjects();
@@ -86,12 +104,15 @@ const AdminProjects = () => {
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="sidebar-brand">
-          <h2>VD Admin</h2>
+          <h2>Admin</h2>
         </div>
         <nav className="sidebar-nav">
           <Link to="/admin">Posts</Link>
+          <Link to="/admin/comments"><FiMessageSquare /> Comments</Link>
           <Link to="/admin/projects" className="active">Projects</Link>
           <Link to="/admin/messages">Messages</Link>
+          <Link to="/admin/settings"><FiImage /> Ảnh trang chủ</Link>
+          <Link to="/" className="home-link"><FiHome /> Trang chủ</Link>
           <button className="logout-btn" onClick={logout}><FiLogOut /> Logout</button>
         </nav>
       </aside>
@@ -141,14 +162,37 @@ const AdminProjects = () => {
                 />
               </div>
               <div className="form-row">
-                <div className="form-group">
-                  <label>Thumbnail URL</label>
-                  <input
-                    type="text"
-                    value={form.thumbnail}
-                    onChange={e => setForm({ ...form, thumbnail: e.target.value })}
-                    placeholder="Image URL"
-                  />
+                <div className="form-group" style={{ flex: 2 }}>
+                  <label>Thumbnail (URL hoặc upload file — không bắt buộc)</label>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      value={form.thumbnail}
+                      onChange={e => setForm({ ...form, thumbnail: e.target.value })}
+                      placeholder="Dán URL ảnh hoặc upload bên dưới..."
+                      style={{ flex: 1 }}
+                    />
+                    <label className="btn-primary" style={{ cursor: 'pointer', whiteSpace: 'nowrap', padding: '0.5rem 1rem', fontSize: '0.85rem', opacity: uploading ? 0.6 : 1 }}>
+                      {uploading ? 'Đang tải...' : '📁 Upload'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        disabled={uploading}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  </div>
+                  {form.thumbnail && (
+                    <div style={{ marginTop: '0.5rem', position: 'relative', display: 'inline-block' }}>
+                      <img src={form.thumbnail} alt="Preview" style={{ maxHeight: '100px', borderRadius: '6px', border: '1px solid #e0e0e0' }} />
+                      <button 
+                        type="button"
+                        onClick={() => setForm({ ...form, thumbnail: '' })} 
+                        style={{ position: 'absolute', top: '-6px', right: '-6px', width: '22px', height: '22px', borderRadius: '50%', background: '#e74c3c', color: 'white', border: 'none', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                      >✕</button>
+                    </div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Display Order</label>

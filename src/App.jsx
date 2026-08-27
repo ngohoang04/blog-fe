@@ -13,6 +13,8 @@ import Dashboard from './pages/admin/Dashboard';
 import CreatePost from './pages/admin/CreatePost';
 import AdminProjects from './pages/admin/AdminProjects';
 import AdminMessages from './pages/admin/AdminMessages';
+import AdminComments from './pages/admin/AdminComments';
+import AdminSettings from './pages/admin/AdminSettings';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import './App.css';
@@ -51,6 +53,8 @@ function App() {
               <Route path="/admin/edit/:id" element={<CreatePost />} />
               <Route path="/admin/projects" element={<AdminProjects />} />
               <Route path="/admin/messages" element={<AdminMessages />} />
+              <Route path="/admin/comments" element={<AdminComments />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
             </Routes>
           </Layout>
         </Router>

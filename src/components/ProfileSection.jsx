@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiLinkedin, FiInstagram, FiMail } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
+import api from '../api/axios';
 import './ProfileSection.css';
 
 const ProfileSection = () => {
   const { t } = useLanguage();
+  const [profileImage, setProfileImage] = useState('');
+
+  useEffect(() => {
+    api.get('/settings').then(res => {
+      if (res.data.profileImage) setProfileImage(res.data.profileImage);
+    }).catch(() => {});
+  }, []);
 
   return (
     <section className="profile-section">
@@ -29,7 +37,11 @@ const ProfileSection = () => {
         </div>
         
         <div className="profile-image-wrapper">
-          <div className="profile-image-placeholder"></div>
+          {profileImage ? (
+            <img src={profileImage} alt="Profile" className="profile-image" />
+          ) : (
+            <div className="profile-image-placeholder"></div>
+          )}
         </div>
       </div>
     </section>

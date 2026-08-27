@@ -21,18 +21,23 @@ const StoryCard = ({ story }) => {
     return story.category || t('storyCard.story');
   };
 
+  // Get correct language fields
+  const useAlt = story.originalLang && story.originalLang !== language && story.titleAlt;
+  const title = useAlt ? story.titleAlt : story.title;
+  // (We don't show excerpt in the card yet, but if we do we'd use it here)
+
   return (
     <Link to={`/stories/${story.slug}`} className="story-card">
       <div className="story-image-wrapper">
         {story.thumbnail ? (
-          <img src={story.thumbnail} alt={story.title} className="story-image" />
+          <img src={story.thumbnail} alt={title} className="story-image" />
         ) : (
           <div className="story-image-placeholder"></div>
         )}
       </div>
       <div className="story-content">
         <span className="story-category">{getCategoryName()}</span>
-        <h3 className="story-title">{story.title}</h3>
+        <h3 className="story-title">{title}</h3>
         <div className="story-meta">
           <span>{formatDate(story.createdAt)}</span>
           <span className="meta-dot">·</span>

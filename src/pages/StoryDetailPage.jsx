@@ -121,6 +121,10 @@ const StoryDetailPage = () => {
 
   const authorName = story.User ? story.User.username : (story.author || 'Cúc');
 
+  const useAlt = story.originalLang && story.originalLang !== language && story.titleAlt;
+  const displayTitle = useAlt ? story.titleAlt : story.title;
+  const displayContent = useAlt && story.contentAlt ? story.contentAlt : story.content;
+
   return (
     <article className="story-detail-page fade-in">
       <div className="container story-detail-container">
@@ -130,7 +134,7 @@ const StoryDetailPage = () => {
         
         <header className="story-header">
           <span className="story-category-pill">{category}</span>
-          <h1 className="story-main-title">{story.title}</h1>
+          <h1 className="story-main-title">{displayTitle}</h1>
           
           <div className="story-meta-large">
             <div className="author-info">
@@ -146,13 +150,16 @@ const StoryDetailPage = () => {
 
         {story.thumbnail && (
           <div className="story-featured-image">
-            <img src={story.thumbnail} alt={story.title} />
+            <img src={story.thumbnail} alt={displayTitle} />
           </div>
         )}
 
         <div 
           className="story-content-body"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(story.content) }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(displayContent, {
+            ADD_TAGS: ['figure', 'figcaption'],
+            ADD_ATTR: ['class', 'alt']
+          }) }}
         />
 
         <div className="story-tags">

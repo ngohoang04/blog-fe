@@ -37,11 +37,21 @@ const FeaturedProjects = () => {
           <div className="projects-grid">
             {projects.slice(0, 3).map(project => (
               <div key={project.id} className="project-card">
-                <div className="project-image-placeholder"></div>
+                <div className="project-image-placeholder">
+                  {project.thumbnail && (
+                    <img src={project.thumbnail} alt={project.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                  )}
+                </div>
                 <div className="project-content">
                   <h3 className="project-title">{project.name || project.title}</h3>
                   <p className="project-desc">{project.description}</p>
-                  <Link to={`/projects`} className="project-link">{t('featuredProjects.viewCase')} &rarr;</Link>
+                  {project.link ? (
+                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="project-link">
+                      {t('featuredProjects.viewCase')} &rarr;
+                    </a>
+                  ) : (
+                    <Link to="/projects" className="project-link">{t('featuredProjects.viewCase')} &rarr;</Link>
+                  )}
                 </div>
               </div>
             ))}

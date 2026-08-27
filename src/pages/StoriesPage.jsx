@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FiSearch } from 'react-icons/fi';
+import { FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { useLanguage } from '../context/LanguageContext';
 import StoryCard from '../components/StoryCard';
 import api from '../api/axios';
 import './StoriesPage.css';
+
+const ITEMS_PER_PAGE = 9;
 
 const StoriesPage = () => {
   const { t } = useLanguage();
@@ -11,41 +13,68 @@ const StoriesPage = () => {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categoryKeys = ['all', 'brands', 'people', 'business', 'culture'];
   const categoryApiValues = ['All', 'Brands', 'People', 'Business', 'Culture'];
 
   useEffect(() => {
-    fetchStories(1, true);
+    setPage(1);
   }, [activeTab]);
 
-  const fetchStories = async (pageNum, reset = false) => {
+  useEffect(() => {
+    fetchStories(page);
+  }, [activeTab, page]);
+
+  const fetchStories = async (pageNum) => {
     setLoading(true);
     try {
       const categoryQuery = activeTab === 'All' ? '' : `&category=${activeTab}`;
-      const res = await api.get(`/posts?page=${pageNum}&limit=9${categoryQuery}`);
+      const searchQ = searchQuery.trim() ? `&search=${encodeURIComponent(searchQuery.trim())}` : '';
+      const res = await api.get(`/posts?page=${pageNum}&limit=${ITEMS_PER_PAGE}${categoryQuery}${searchQ}`);
       
-      const newStories = res.data.posts || res.data;
-      
-      if (reset) {
-        setStories(newStories);
-      } else {
-        setStories(prev => [...prev, ...newStories]);
-      }
-      
-      setHasMore(newStories.length === 9);
-      setPage(pageNum);
+      setStories(res.data.posts || res.data);
+      setTotalPages(res.data.pages || 1);
+      setTotal(res.data.total || 0);
     } catch (error) {
-      if(reset) setStories([]);
-      setHasMore(false);
+      setStories([]);
+      setTotalPages(1);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLoadMore = () => {
-    fetchStories(page + 1);
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setPage(1);
+    fetchStories(1);
+  };
+
+  const goToPage = (p) => {
+    if (p >= 1 && p <= totalPages) {
+      setPage(p);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
+    let start = Math.max(1, page - Math.floor(maxVisible / 2));
+    let end = Math.min(totalPages, start + maxVisible - 1);
+    
+    if (end - start < maxVisible - 1) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   return (
@@ -71,28 +100,74 @@ const StoriesPage = () => {
             ))}
           </div>
           
-          <div className="search-box">
+          <form className="search-box" onSubmit={handleSearch}>
             <FiSearch className="search-icon" />
-            <input type="text" placeholder={t('latestStories.searchPlaceholder')} />
-          </div>
+            <input 
+              type="text" 
+              placeholder={t('latestStories.searchPlaceholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </form>
         </div>
 
-        <div className="stories-grid">
-          {stories.map(story => (
-            <StoryCard key={story.id || story.slug} story={story} />
-          ))}
-        </div>
-
-        {loading && <div className="loading-state">{t('latestStories.loading')}</div>}
-        
-        {!loading && hasMore && (
-          <div className="load-more-wrapper">
-            <button className="btn-primary" onClick={handleLoadMore}>{t('storiesPage.loadMore')}</button>
-          </div>
-        )}
-        
-        {!loading && stories.length === 0 && (
+        {loading ? (
+          <div className="loading-state">{t('latestStories.loading')}</div>
+        ) : stories.length === 0 ? (
           <div className="empty-state">{t('storiesPage.noStories')}</div>
+        ) : (
+          <>
+            <div className="stories-grid">
+              {stories.map(story => (
+                <StoryCard key={story.id || story.slug} story={story} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button 
+                  className="pagination-btn" 
+                  onClick={() => goToPage(page - 1)}
+                  disabled={page === 1}
+                >
+                  <FiChevronLeft />
+                </button>
+
+                {getPageNumbers()[0] > 1 && (
+                  <>
+                    <button className="pagination-num" onClick={() => goToPage(1)}>1</button>
+                    {getPageNumbers()[0] > 2 && <span className="pagination-dots">...</span>}
+                  </>
+                )}
+
+                {getPageNumbers().map(p => (
+                  <button 
+                    key={p}
+                    className={`pagination-num ${p === page ? 'active' : ''}`}
+                    onClick={() => goToPage(p)}
+                  >
+                    {p}
+                  </button>
+                ))}
+
+                {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
+                  <>
+                    {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && <span className="pagination-dots">...</span>}
+                    <button className="pagination-num" onClick={() => goToPage(totalPages)}>{totalPages}</button>
+                  </>
+                )}
+
+                <button 
+                  className="pagination-btn" 
+                  onClick={() => goToPage(page + 1)}
+                  disabled={page === totalPages}
+                >
+                  <FiChevronRight />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

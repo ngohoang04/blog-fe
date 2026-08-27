@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { FiPlus, FiEdit2, FiTrash2, FiLogOut } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiLogOut, FiHome, FiMessageSquare, FiImage } from 'react-icons/fi';
 import api from '../../api/axios';
 import './Dashboard.css';
 
@@ -52,16 +52,19 @@ const Dashboard = () => {
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="sidebar-brand">
-          <h2>VD Admin</h2>
+          <h2>Admin</h2>
         </div>
         <nav className="sidebar-nav">
           <Link to="/admin" className="active">Posts</Link>
+          <Link to="/admin/comments"><FiMessageSquare /> Comments</Link>
           <Link to="/admin/projects">Projects</Link>
           <Link to="/admin/messages">Messages</Link>
+          <Link to="/admin/settings"><FiImage /> Ảnh trang chủ</Link>
+          <Link to="/" className="home-link"><FiHome /> Trang chủ</Link>
           <button className="logout-btn" onClick={logout}><FiLogOut /> Logout</button>
         </nav>
       </aside>
-      
+
       <main className="admin-main">
         <header className="admin-header">
           <h1>Dashboard</h1>
