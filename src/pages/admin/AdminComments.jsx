@@ -59,6 +59,7 @@ const AdminComments = () => {
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const isEn = language === 'en';
 
   if (!isAuthenticated) return <Navigate to="/admin/login" />;
 
@@ -72,13 +73,13 @@ const AdminComments = () => {
           </button>
         </div>
         <nav className={`sidebar-nav ${isSidebarOpen ? 'open' : ''}`}>
-          <Link to="/admin"><FiFileText /> Posts</Link>
-          <Link to="/admin/comments" className="active"><FiMessageSquare /> Comments</Link>
-          <Link to="/admin/projects"><FiFolder /> Projects</Link>
-          <Link to="/admin/messages"><FiMail /> Messages</Link>
-          <Link to="/admin/settings"><FiImage /> Homepage Images</Link>
-          <Link to="/" className="home-link"><FiHome /> Go to Homepage</Link>
-          <button className="logout-btn" onClick={logout}><FiLogOut /> Logout</button>
+          <Link to="/admin"><FiFileText /> {isEn ? 'Posts' : 'Bài viết'}</Link>
+          <Link to="/admin/comments" className="active"><FiMessageSquare /> {isEn ? 'Comments' : 'Bình luận'}</Link>
+          <Link to="/admin/projects"><FiFolder /> {isEn ? 'Projects' : 'Dự án'}</Link>
+          <Link to="/admin/messages"><FiMail /> {isEn ? 'Messages' : 'Tin nhắn'}</Link>
+          <Link to="/admin/settings"><FiImage /> {isEn ? 'Homepage Images' : 'Ảnh trang chủ'}</Link>
+          <Link to="/" className="home-link"><FiHome /> {isEn ? 'Go to Homepage' : 'Trang chủ'}</Link>
+          <button className="logout-btn" onClick={logout}><FiLogOut /> {isEn ? 'Logout' : 'Đăng xuất'}</button>
 
           <div className="admin-lang-toggle" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem', color: '#fff' }}>
             <span style={{ cursor: 'pointer', fontWeight: language === 'en' ? 'bold' : 'normal', opacity: language === 'en' ? 1 : 0.6 }} onClick={() => setLanguage('en')}>EN</span>
@@ -90,37 +91,37 @@ const AdminComments = () => {
 
       <main className="admin-main">
         <header className="admin-header">
-          <h1>Comments Management ({filteredComments.length})</h1>
+          <h1>{isEn ? 'Comments Management' : 'Quản lý bình luận'} ({filteredComments.length})</h1>
           <div className="comment-filters">
             <button
               className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
               onClick={() => setFilter('all')}
-            >All</button>
+            >{isEn ? 'All' : 'Tất cả'}</button>
             <button
               className={`filter-btn ${filter === 'guest' ? 'active' : ''}`}
               onClick={() => setFilter('guest')}
-            >Guests</button>
+            >{isEn ? 'Guests' : 'Khách'}</button>
             <button
               className={`filter-btn ${filter === 'user' ? 'active' : ''}`}
               onClick={() => setFilter('user')}
-            >Members</button>
+            >{isEn ? 'Members' : 'Thành viên'}</button>
           </div>
         </header>
 
         <div className="admin-content-box">
           {loading ? (
-            <p>Loading...</p>
+            <p>{isEn ? 'Loading...' : 'Đang tải...'}</p>
           ) : filteredComments.length === 0 ? (
-            <p style={{ color: '#888', textAlign: 'center', padding: '2rem' }}>No comments found.</p>
+            <p style={{ color: '#888', textAlign: 'center', padding: '2rem' }}>{isEn ? 'No comments found.' : 'Chưa có bình luận nào.'}</p>
           ) : (
             <table className="admin-table comments-table">
               <thead>
                 <tr>
-                  <th>Author</th>
-                  <th>Content</th>
-                  <th>Post</th>
-                  <th>Date</th>
-                  <th>Actions</th>
+                  <th>{isEn ? 'Author' : 'Người bình luận'}</th>
+                  <th>{isEn ? 'Content' : 'Nội dung'}</th>
+                  <th>{isEn ? 'Post' : 'Bài viết'}</th>
+                  <th>{isEn ? 'Date' : 'Ngày'}</th>
+                  <th>{isEn ? 'Actions' : 'Thao tác'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -129,7 +130,7 @@ const AdminComments = () => {
                     <td>
                       <div>
                         <strong>{comment.displayName}</strong>
-                        {!comment.userId && <span className="status-badge draft" style={{ marginLeft: '0.5rem' }}>Khách</span>}
+                        {!comment.userId && <span className="status-badge draft" style={{ marginLeft: '0.5rem' }}>{isEn ? 'Guest' : 'Khách'}</span>}
                       </div>
                       {comment.guestEmail && (
                         <div style={{ fontSize: '0.8rem', color: '#888' }}>{comment.guestEmail}</div>

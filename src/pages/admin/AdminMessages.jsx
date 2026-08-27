@@ -54,6 +54,8 @@ const AdminMessages = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const isEn = language === 'en';
+
   if (!isAuthenticated) return <Navigate to="/admin/login" />;
 
   const unreadCount = messages.filter(m => !m.isRead).length;
@@ -68,13 +70,13 @@ const AdminMessages = () => {
           </button>
         </div>
         <nav className={`sidebar-nav ${isSidebarOpen ? 'open' : ''}`}>
-          <Link to="/admin"><FiFileText /> Posts</Link>
-          <Link to="/admin/comments"><FiMessageSquare /> Comments</Link>
-          <Link to="/admin/projects"><FiFolder /> Projects</Link>
-          <Link to="/admin/messages" className="active"><FiMail /> Messages</Link>
-          <Link to="/admin/settings"><FiImage /> Homepage Images</Link>
-          <Link to="/" className="home-link"><FiHome /> Go to Homepage</Link>
-          <button className="logout-btn" onClick={logout}><FiLogOut /> Logout</button>
+          <Link to="/admin"><FiFileText /> {isEn ? 'Posts' : 'Bài viết'}</Link>
+          <Link to="/admin/comments"><FiMessageSquare /> {isEn ? 'Comments' : 'Bình luận'}</Link>
+          <Link to="/admin/projects"><FiFolder /> {isEn ? 'Projects' : 'Dự án'}</Link>
+          <Link to="/admin/messages" className="active"><FiMail /> {isEn ? 'Messages' : 'Tin nhắn'}</Link>
+          <Link to="/admin/settings"><FiImage /> {isEn ? 'Homepage Images' : 'Ảnh trang chủ'}</Link>
+          <Link to="/" className="home-link"><FiHome /> {isEn ? 'Go to Homepage' : 'Trang chủ'}</Link>
+          <button className="logout-btn" onClick={logout}><FiLogOut /> {isEn ? 'Logout' : 'Đăng xuất'}</button>
 
           <div className="admin-lang-toggle" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem', color: '#fff' }}>
             <span style={{ cursor: 'pointer', fontWeight: language === 'en' ? 'bold' : 'normal', opacity: language === 'en' ? 1 : 0.6 }} onClick={() => setLanguage('en')}>EN</span>
@@ -86,29 +88,29 @@ const AdminMessages = () => {
 
       <main className="admin-main">
         <header className="admin-header">
-          <h1>Messages {unreadCount > 0 && <span className="unread-badge">{unreadCount} new</span>}</h1>
+          <h1>{isEn ? 'Messages' : 'Tin nhắn'} {unreadCount > 0 && <span className="unread-badge">{unreadCount} {isEn ? 'new' : 'mới'}</span>}</h1>
         </header>
 
         {info && <div className="admin-message">{info}</div>}
 
         <div className="admin-stats" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
           <div className="stat-card">
-            <h3>Total Messages</h3>
+            <h3>{isEn ? 'Total Messages' : 'Tổng số'}</h3>
             <p className="stat-number">{messages.length}</p>
           </div>
           <div className="stat-card">
-            <h3>Unread</h3>
-            <p className="stat-number" style={{ color: unreadCount > 0 ? '#e74c3c' : 'inherit' }}>{unreadCount}</p>
+            <h3>{isEn ? 'Unread' : 'Chưa đọc'}</h3>
+            <p className="stat-number">{unreadCount}</p>
           </div>
         </div>
 
-        <div className="messages-container">
-          <div className="admin-content-box messages-list-box">
-            <h2>All Messages</h2>
+        <div className="admin-messages-layout">
+          <div className="admin-content-box message-list-box">
+            <h2>{isEn ? 'Inbox' : 'Hộp thư'}</h2>
             {loading ? (
-              <p>Loading...</p>
+              <p>{isEn ? 'Loading...' : 'Đang tải...'}</p>
             ) : messages.length === 0 ? (
-              <p style={{ color: 'var(--color-text-secondary)', padding: '2rem 0' }}>No messages yet.</p>
+              <p style={{ color: 'var(--color-text-secondary)', padding: '2rem 0' }}>{isEn ? 'No messages yet.' : 'Chưa có tin nhắn nào.'}</p>
             ) : (
               <div className="messages-list">
                 {messages.map(msg => (
@@ -121,7 +123,7 @@ const AdminMessages = () => {
                       <span className="message-sender">{msg.name}</span>
                       {!msg.isRead && <span className="unread-dot" />}
                     </div>
-                    <div className="message-subject">{msg.subject || '(No subject)'}</div>
+                    <div className="message-subject">{msg.subject || (isEn ? '(No subject)' : '(Không có chủ đề)')}</div>
                     <div className="message-preview">{msg.message?.substring(0, 80)}...</div>
                     <div className="message-time">
                       <FiClock size={12} /> {formatDate(msg.createdAt)}
@@ -136,22 +138,25 @@ const AdminMessages = () => {
             {selectedMsg ? (
               <>
                 <div className="message-detail-header">
-                  <h2>{selectedMsg.subject || '(No subject)'}</h2>
+                  <h2>{selectedMsg.subject || (isEn ? '(No subject)' : '(Không có chủ đề)')}</h2>
                   <div className="message-detail-actions">
                     {!selectedMsg.isRead && (
-                      <button className="action-btn edit" onClick={() => handleMarkRead(selectedMsg.id)} title="Mark as read">
+                      <button className="action-btn edit" onClick={() => handleMarkRead(selectedMsg.id)} title={isEn ? 'Mark as read' : 'Đánh dấu đã đọc'}>
                         <FiCheckCircle />
                       </button>
                     )}
+                    <button className="action-btn delete" onClick={() => handleDelete(selectedMsg.id)} title={isEn ? 'Delete' : 'Xóa'}>
+                      <FiTrash2 />
+                    </button>
                   </div>
                 </div>
                 <div className="message-meta">
-                  <p><strong>From:</strong> {selectedMsg.name}</p>
+                  <p><strong>{isEn ? 'From:' : 'Từ:'}</strong> {selectedMsg.name}</p>
                   <p><strong>Email:</strong> <a href={`mailto:${selectedMsg.email}`}>{selectedMsg.email}</a></p>
-                  <p><strong>Date:</strong> {formatDate(selectedMsg.createdAt)}</p>
-                  <p><strong>Status:</strong>
+                  <p><strong>{isEn ? 'Date:' : 'Ngày:'}</strong> {formatDate(selectedMsg.createdAt)}</p>
+                  <p><strong>{isEn ? 'Status:' : 'Trạng thái:'}</strong>
                     <span className={`status-badge ${selectedMsg.isRead ? 'published' : 'draft'}`} style={{ marginLeft: '0.5rem' }}>
-                      {selectedMsg.isRead ? 'Read' : 'Unread'}
+                      {selectedMsg.isRead ? (isEn ? 'Read' : 'Đã đọc') : (isEn ? 'Unread' : 'Chưa đọc')}
                     </span>
                   </p>
                 </div>
@@ -161,9 +166,9 @@ const AdminMessages = () => {
                 </div>
               </>
             ) : (
-              <div className="message-empty">
-                <FiMail size={48} style={{ color: 'var(--color-border)' }} />
-                <p>Select a message to read</p>
+              <div className="no-message-selected">
+                <FiMail size={48} color="#ccc" />
+                <p>{isEn ? 'Select a message to read' : 'Chọn một tin nhắn để đọc'}</p>
               </div>
             )}
           </div>
