@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { FiPlus, FiEdit2, FiTrash2, FiLogOut, FiHome, FiMessageSquare, FiImage } from 'react-icons/fi';
+import { useLanguage } from '../../context/LanguageContext';
+import { FiPlus, FiEdit2, FiTrash2, FiLogOut, FiHome, FiMessageSquare, FiImage, FiFileText, FiFolder, FiMail } from 'react-icons/fi';
 import api from '../../api/axios';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
+  const { language, setLanguage } = useLanguage();
+  const isEn = language === 'en';
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,7 +22,7 @@ const Dashboard = () => {
   const fetchPosts = async () => {
     try {
       // Include drafts for admin
-      const res = await api.get('/posts?limit=50');
+      const res = await api.get('/posts?limit=50&includeDrafts=true');
       setPosts(res.data.posts || res.data || []);
     } catch (err) {
       console.error(err);
@@ -44,6 +47,8 @@ const Dashboard = () => {
     }
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" />;
   }
@@ -51,53 +56,62 @@ const Dashboard = () => {
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="sidebar-brand">
+        <div className="sidebar-brand" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>Admin</h2>
+          <button className="mobile-sidebar-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ background: 'none', color: '#fff', border: 'none', fontSize: '1.5rem', cursor: 'pointer', display: 'none' }}>
+            ☰
+          </button>
         </div>
-        <nav className="sidebar-nav">
-          <Link to="/admin" className="active">Posts</Link>
-          <Link to="/admin/comments"><FiMessageSquare /> Comments</Link>
-          <Link to="/admin/projects">Projects</Link>
-          <Link to="/admin/messages">Messages</Link>
-          <Link to="/admin/settings"><FiImage /> Ảnh trang chủ</Link>
-          <Link to="/" className="home-link"><FiHome /> Trang chủ</Link>
-          <button className="logout-btn" onClick={logout}><FiLogOut /> Logout</button>
+        <nav className={`sidebar-nav ${isSidebarOpen ? 'open' : ''}`}>
+          <Link to="/admin" className="active"><FiFileText /> {isEn ? 'Posts' : 'Bài viết'}</Link>
+          <Link to="/admin/comments"><FiMessageSquare /> {isEn ? 'Comments' : 'Bình luận'}</Link>
+          <Link to="/admin/projects"><FiFolder /> {isEn ? 'Projects' : 'Dự án'}</Link>
+          <Link to="/admin/messages"><FiMail /> {isEn ? 'Messages' : 'Tin nhắn'}</Link>
+          <Link to="/admin/settings"><FiImage /> {isEn ? 'Homepage Images' : 'Ảnh trang chủ'}</Link>
+          <Link to="/" className="home-link"><FiHome /> {isEn ? 'Go to Homepage' : 'Trang chủ'}</Link>
+          <button className="logout-btn" onClick={logout}><FiLogOut /> {isEn ? 'Logout' : 'Đăng xuất'}</button>
+          
+          <div className="admin-lang-toggle" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem', color: '#fff' }}>
+            <span style={{ cursor: 'pointer', fontWeight: language === 'en' ? 'bold' : 'normal', opacity: language === 'en' ? 1 : 0.6 }} onClick={() => setLanguage('en')}>EN</span>
+            <span>/</span>
+            <span style={{ cursor: 'pointer', fontWeight: language === 'vi' ? 'bold' : 'normal', opacity: language === 'vi' ? 1 : 0.6 }} onClick={() => setLanguage('vi')}>VI</span>
+          </div>
         </nav>
       </aside>
 
       <main className="admin-main">
         <header className="admin-header">
-          <h1>Dashboard</h1>
-          <Link to="/admin/create" className="btn-primary"><FiPlus /> New Post</Link>
+          <h1>{isEn ? 'Dashboard' : 'Bảng điều khiển'}</h1>
+          <Link to="/admin/create" className="btn-primary"><FiPlus /> {isEn ? 'New Post' : 'Bài viết mới'}</Link>
         </header>
 
         <div className="admin-stats">
           <div className="stat-card">
-            <h3>Total Posts</h3>
+            <h3>{isEn ? 'Total Posts' : 'Tổng bài viết'}</h3>
             <p className="stat-number">{posts.length}</p>
           </div>
           <div className="stat-card">
-            <h3>Published</h3>
+            <h3>{isEn ? 'Published' : 'Đã xuất bản'}</h3>
             <p className="stat-number">{posts.filter(p => p.status !== 'draft').length}</p>
           </div>
           <div className="stat-card">
-            <h3>Drafts</h3>
+            <h3>{isEn ? 'Drafts' : 'Bản nháp'}</h3>
             <p className="stat-number">{posts.filter(p => p.status === 'draft').length}</p>
           </div>
         </div>
 
         <div className="admin-content-box">
-          <h2>Recent Posts</h2>
+          <h2>{isEn ? 'Recent Posts' : 'Bài viết gần đây'}</h2>
           {loading ? (
-            <p>Loading...</p>
+            <p>{isEn ? 'Loading...' : 'Đang tải...'}</p>
           ) : (
-            <table className="admin-table">
+            <table className="admin-table posts-table">
               <thead>
                 <tr>
-                  <th>Title</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th>Actions</th>
+                  <th>{isEn ? 'Title' : 'Tiêu đề'}</th>
+                  <th>{isEn ? 'Status' : 'Trạng thái'}</th>
+                  <th>{isEn ? 'Date' : 'Ngày đăng'}</th>
+                  <th>{isEn ? 'Actions' : 'Thao tác'}</th>
                 </tr>
               </thead>
               <tbody>

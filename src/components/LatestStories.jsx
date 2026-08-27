@@ -62,7 +62,7 @@ const LatestStories = () => {
           <div className="loading-state">{t('latestStories.loading')}</div>
         ) : (
           <div className="stories-grid">
-            {stories.slice(0, 6).map(story => (
+            {stories.slice(0, 3).map(story => (
               <StoryCard key={story.id || story.slug} story={story} />
             ))}
           </div>

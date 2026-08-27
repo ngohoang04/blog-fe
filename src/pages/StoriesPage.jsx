@@ -5,7 +5,7 @@ import StoryCard from '../components/StoryCard';
 import api from '../api/axios';
 import './StoriesPage.css';
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 8;
 
 const StoriesPage = () => {
   const { t } = useLanguage();
@@ -16,9 +16,16 @@ const StoriesPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
 
   const categoryKeys = ['all', 'brands', 'people', 'business', 'culture'];
   const categoryApiValues = ['All', 'Brands', 'People', 'Business', 'Culture'];
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 480);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     setPage(1);
@@ -63,7 +70,8 @@ const StoriesPage = () => {
   // Generate page numbers to display
   const getPageNumbers = () => {
     const pages = [];
-    const maxVisible = 5;
+    // Show fewer page buttons on mobile to prevent wrapping
+    const maxVisible = isMobile ? 3 : 5;
     let start = Math.max(1, page - Math.floor(maxVisible / 2));
     let end = Math.min(totalPages, start + maxVisible - 1);
     
@@ -117,14 +125,14 @@ const StoriesPage = () => {
           <div className="empty-state">{t('storiesPage.noStories')}</div>
         ) : (
           <>
-            <div className="stories-grid">
+            <div className="stories-grid stories-page-grid">
               {stories.map(story => (
                 <StoryCard key={story.id || story.slug} story={story} />
               ))}
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+            {/* Pagination (always show for testing) */}
+            {totalPages >= 1 && (
               <div className="pagination">
                 <button 
                   className="pagination-btn" 

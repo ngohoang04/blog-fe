@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { FiLogOut, FiMail, FiCheckCircle, FiTrash2, FiClock, FiHome, FiMessageSquare, FiImage } from 'react-icons/fi';
+import { useLanguage } from '../../context/LanguageContext';
+import { FiLogOut, FiMail, FiCheckCircle, FiTrash2, FiClock, FiHome, FiMessageSquare, FiImage, FiFileText, FiFolder } from 'react-icons/fi';
 import api from '../../api/axios';
 import './Dashboard.css';
 import './AdminExtra.css';
 
 const AdminMessages = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
+  const { language, setLanguage } = useLanguage();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedMsg, setSelectedMsg] = useState(null);
@@ -50,6 +52,8 @@ const AdminMessages = () => {
     });
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   if (!isAuthenticated) return <Navigate to="/admin/login" />;
 
   const unreadCount = messages.filter(m => !m.isRead).length;
@@ -57,17 +61,26 @@ const AdminMessages = () => {
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="sidebar-brand">
+        <div className="sidebar-brand" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>Admin</h2>
+          <button className="mobile-sidebar-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ background: 'none', color: '#fff', border: 'none', fontSize: '1.5rem', cursor: 'pointer', display: 'none' }}>
+            ☰
+          </button>
         </div>
-        <nav className="sidebar-nav">
-          <Link to="/admin">Posts</Link>
+        <nav className={`sidebar-nav ${isSidebarOpen ? 'open' : ''}`}>
+          <Link to="/admin"><FiFileText /> Posts</Link>
           <Link to="/admin/comments"><FiMessageSquare /> Comments</Link>
-          <Link to="/admin/projects">Projects</Link>
-          <Link to="/admin/messages" className="active">Messages</Link>
-          <Link to="/admin/settings"><FiImage /> Ảnh trang chủ</Link>
-          <Link to="/" className="home-link"><FiHome /> Trang chủ</Link>
+          <Link to="/admin/projects"><FiFolder /> Projects</Link>
+          <Link to="/admin/messages" className="active"><FiMail /> Messages</Link>
+          <Link to="/admin/settings"><FiImage /> Homepage Images</Link>
+          <Link to="/" className="home-link"><FiHome /> Go to Homepage</Link>
           <button className="logout-btn" onClick={logout}><FiLogOut /> Logout</button>
+
+          <div className="admin-lang-toggle" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem', color: '#fff' }}>
+            <span style={{ cursor: 'pointer', fontWeight: language === 'en' ? 'bold' : 'normal', opacity: language === 'en' ? 1 : 0.6 }} onClick={() => setLanguage('en')}>EN</span>
+            <span>/</span>
+            <span style={{ cursor: 'pointer', fontWeight: language === 'vi' ? 'bold' : 'normal', opacity: language === 'vi' ? 1 : 0.6 }} onClick={() => setLanguage('vi')}>VI</span>
+          </div>
         </nav>
       </aside>
 

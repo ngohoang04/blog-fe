@@ -217,10 +217,10 @@ const CreatePost = () => {
         contentAlt: translated.content || '',
         excerptAlt: translated.excerpt || ''
       }));
-      alert('Dịch thành công!');
+      alert('Translation successful!');
     } catch (err) {
       console.error('Translation failed', err);
-      alert('Lỗi khi tự động dịch: ' + (err.response?.data?.message || err.message));
+      alert('Auto-translation failed: ' + (err.response?.data?.message || err.message));
     } finally {
       setSaving(false);
     }
@@ -262,14 +262,14 @@ const CreatePost = () => {
                 onClick={() => setLanguageTab('original')}
                 style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: languageTab === 'original' ? 'bold' : 'normal', color: languageTab === 'original' ? '#000' : '#888', cursor: 'pointer' }}
               >
-                Ngôn ngữ gốc ({formData.originalLang === 'en' ? 'EN' : 'VI'})
+                Original ({formData.originalLang === 'en' ? 'EN' : 'VI'})
               </button>
               <button 
                 type="button"
                 onClick={() => setLanguageTab('translated')}
                 style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: languageTab === 'translated' ? 'bold' : 'normal', color: languageTab === 'translated' ? '#000' : '#888', cursor: 'pointer' }}
               >
-                Bản dịch ({formData.originalLang === 'en' ? 'VI' : 'EN'})
+                Translation ({formData.originalLang === 'en' ? 'VI' : 'EN'})
               </button>
               <button 
                 type="button"
@@ -277,7 +277,7 @@ const CreatePost = () => {
                 disabled={saving}
                 style={{ marginLeft: 'auto', background: '#3498db', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.3rem 0.8rem', cursor: 'pointer', opacity: saving ? 0.7 : 1 }}
               >
-                {saving ? 'Đang dịch...' : '🔄 Tự động dịch'}
+                {saving ? 'Translating...' : '🔄 Auto Translate'}
               </button>
             </div>
 

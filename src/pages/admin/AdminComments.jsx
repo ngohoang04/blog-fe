@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { FiTrash2, FiLogOut, FiHome, FiMessageSquare, FiImage } from 'react-icons/fi';
+import { useLanguage } from '../../context/LanguageContext';
+import { FiTrash2, FiLogOut, FiHome, FiMessageSquare, FiImage, FiFileText, FiFolder, FiMail } from 'react-icons/fi';
 import api from '../../api/axios';
 import './Dashboard.css';
 
 const AdminComments = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
+  const { language, setLanguage } = useLanguage();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // 'all', 'guest', 'user'
@@ -56,41 +58,52 @@ const AdminComments = () => {
     return true;
   });
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   if (!isAuthenticated) return <Navigate to="/admin/login" />;
 
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="sidebar-brand">
+        <div className="sidebar-brand" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>Admin</h2>
+          <button className="mobile-sidebar-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ background: 'none', color: '#fff', border: 'none', fontSize: '1.5rem', cursor: 'pointer', display: 'none' }}>
+            ☰
+          </button>
         </div>
-        <nav className="sidebar-nav">
-          <Link to="/admin">Posts</Link>
+        <nav className={`sidebar-nav ${isSidebarOpen ? 'open' : ''}`}>
+          <Link to="/admin"><FiFileText /> Posts</Link>
           <Link to="/admin/comments" className="active"><FiMessageSquare /> Comments</Link>
-          <Link to="/admin/projects">Projects</Link>
-          <Link to="/admin/messages">Messages</Link>
-          <Link to="/admin/settings"><FiImage /> Ảnh trang chủ</Link>
-          <Link to="/" className="home-link"><FiHome /> Trang chủ</Link>
+          <Link to="/admin/projects"><FiFolder /> Projects</Link>
+          <Link to="/admin/messages"><FiMail /> Messages</Link>
+          <Link to="/admin/settings"><FiImage /> Homepage Images</Link>
+          <Link to="/" className="home-link"><FiHome /> Go to Homepage</Link>
           <button className="logout-btn" onClick={logout}><FiLogOut /> Logout</button>
+
+          <div className="admin-lang-toggle" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem', color: '#fff' }}>
+            <span style={{ cursor: 'pointer', fontWeight: language === 'en' ? 'bold' : 'normal', opacity: language === 'en' ? 1 : 0.6 }} onClick={() => setLanguage('en')}>EN</span>
+            <span>/</span>
+            <span style={{ cursor: 'pointer', fontWeight: language === 'vi' ? 'bold' : 'normal', opacity: language === 'vi' ? 1 : 0.6 }} onClick={() => setLanguage('vi')}>VI</span>
+          </div>
         </nav>
       </aside>
 
       <main className="admin-main">
         <header className="admin-header">
-          <h1>Quản lý bình luận ({filteredComments.length})</h1>
+          <h1>Comments Management ({filteredComments.length})</h1>
           <div className="comment-filters">
             <button
               className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
               onClick={() => setFilter('all')}
-            >Tất cả</button>
+            >All</button>
             <button
               className={`filter-btn ${filter === 'guest' ? 'active' : ''}`}
               onClick={() => setFilter('guest')}
-            >Khách</button>
+            >Guests</button>
             <button
               className={`filter-btn ${filter === 'user' ? 'active' : ''}`}
               onClick={() => setFilter('user')}
-            >Thành viên</button>
+            >Members</button>
           </div>
         </header>
 
@@ -98,16 +111,16 @@ const AdminComments = () => {
           {loading ? (
             <p>Loading...</p>
           ) : filteredComments.length === 0 ? (
-            <p style={{ color: '#888', textAlign: 'center', padding: '2rem' }}>Chưa có bình luận nào.</p>
+            <p style={{ color: '#888', textAlign: 'center', padding: '2rem' }}>No comments found.</p>
           ) : (
-            <table className="admin-table">
+            <table className="admin-table comments-table">
               <thead>
                 <tr>
-                  <th>Người bình luận</th>
-                  <th>Nội dung</th>
-                  <th>Bài viết</th>
-                  <th>Ngày</th>
-                  <th>Xóa</th>
+                  <th>Author</th>
+                  <th>Content</th>
+                  <th>Post</th>
+                  <th>Date</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>

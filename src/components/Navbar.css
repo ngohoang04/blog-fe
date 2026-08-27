@@ -169,7 +169,6 @@
     visibility: visible;
   }
 
-  /* Fullscreen slide menu */
   .mobile-menu {
     display: flex;
     flex-direction: column;
@@ -177,7 +176,6 @@
     top: 0;
     right: 0;
     width: 100%;
-    max-width: 420px;
     height: 100vh;
     height: 100dvh;
     background: var(--color-bg);

@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { FiPlus, FiEdit2, FiTrash2, FiLogOut, FiExternalLink, FiHome, FiMessageSquare, FiImage } from 'react-icons/fi';
+import { useLanguage } from '../../context/LanguageContext';
+import { FiPlus, FiEdit2, FiTrash2, FiLogOut, FiExternalLink, FiHome, FiMessageSquare, FiImage, FiFileText, FiFolder, FiMail } from 'react-icons/fi';
 import api from '../../api/axios';
 import './Dashboard.css';
 import './AdminExtra.css';
 
 const AdminProjects = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
+  const { language, setLanguage } = useLanguage();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -98,30 +100,43 @@ const AdminProjects = () => {
     }
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const isEn = language === 'en';
+
   if (!isAuthenticated) return <Navigate to="/admin/login" />;
 
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">
-        <div className="sidebar-brand">
+        <div className="sidebar-brand" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>Admin</h2>
+          <button className="mobile-sidebar-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ background: 'none', color: '#fff', border: 'none', fontSize: '1.5rem', cursor: 'pointer', display: 'none' }}>
+            ☰
+          </button>
         </div>
-        <nav className="sidebar-nav">
-          <Link to="/admin">Posts</Link>
-          <Link to="/admin/comments"><FiMessageSquare /> Comments</Link>
-          <Link to="/admin/projects" className="active">Projects</Link>
-          <Link to="/admin/messages">Messages</Link>
-          <Link to="/admin/settings"><FiImage /> Ảnh trang chủ</Link>
-          <Link to="/" className="home-link"><FiHome /> Trang chủ</Link>
-          <button className="logout-btn" onClick={logout}><FiLogOut /> Logout</button>
+        <nav className={`sidebar-nav ${isSidebarOpen ? 'open' : ''}`}>
+          <Link to="/admin"><FiFileText /> {isEn ? 'Posts' : 'Bài viết'}</Link>
+          <Link to="/admin/comments"><FiMessageSquare /> {isEn ? 'Comments' : 'Bình luận'}</Link>
+          <Link to="/admin/projects" className="active"><FiFolder /> {isEn ? 'Projects' : 'Dự án'}</Link>
+          <Link to="/admin/messages"><FiMail /> {isEn ? 'Messages' : 'Tin nhắn'}</Link>
+          <Link to="/admin/settings"><FiImage /> {isEn ? 'Homepage Images' : 'Ảnh trang chủ'}</Link>
+          <Link to="/" className="home-link"><FiHome /> {isEn ? 'Go to Homepage' : 'Trang chủ'}</Link>
+          <button className="logout-btn" onClick={logout}><FiLogOut /> {isEn ? 'Logout' : 'Đăng xuất'}</button>
+
+          <div className="admin-lang-toggle" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem', color: '#fff' }}>
+            <span style={{ cursor: 'pointer', fontWeight: language === 'en' ? 'bold' : 'normal', opacity: language === 'en' ? 1 : 0.6 }} onClick={() => setLanguage('en')}>EN</span>
+            <span>/</span>
+            <span style={{ cursor: 'pointer', fontWeight: language === 'vi' ? 'bold' : 'normal', opacity: language === 'vi' ? 1 : 0.6 }} onClick={() => setLanguage('vi')}>VI</span>
+          </div>
         </nav>
       </aside>
 
       <main className="admin-main">
         <header className="admin-header">
-          <h1>Projects</h1>
+          <h1>{isEn ? 'Projects' : 'Quản lý dự án'}</h1>
           <button className="btn-primary" onClick={() => { resetForm(); setShowForm(!showForm); }}>
-            <FiPlus /> {showForm ? 'Cancel' : 'New Project'}
+            <FiPlus /> {showForm ? (isEn ? 'Cancel' : 'Hủy') : (isEn ? 'New Project' : 'Dự án mới')}
           </button>
         </header>
 
@@ -195,7 +210,7 @@ const AdminProjects = () => {
                   )}
                 </div>
                 <div className="form-group">
-                  <label>Display Order</label>
+                  <label>{isEn ? 'Display Order' : 'Thứ tự hiển thị'}</label>
                   <input
                     type="number"
                     value={form.displayOrder}
@@ -203,28 +218,28 @@ const AdminProjects = () => {
                   />
                 </div>
               </div>
-              <button type="submit" className="btn-primary">
-                {editingId ? 'Update Project' : 'Create Project'}
+              <button type="submit" className="btn-primary" disabled={saving}>
+                {saving ? (isEn ? 'Saving...' : 'Đang lưu...') : (editingId ? (isEn ? 'Update Project' : 'Cập nhật') : (isEn ? 'Create Project' : 'Tạo mới'))}
               </button>
             </form>
           </div>
         )}
 
         <div className="admin-content-box">
-          <h2>All Projects ({projects.length})</h2>
+          <h2>{isEn ? 'All Projects' : 'Tất cả dự án'} ({projects.length})</h2>
           {loading ? (
-            <p>Loading...</p>
+            <p>{isEn ? 'Loading...' : 'Đang tải...'}</p>
           ) : projects.length === 0 ? (
-            <p style={{ color: 'var(--color-text-secondary)', padding: '2rem 0' }}>No projects yet. Create your first project!</p>
+            <p style={{ color: 'var(--color-text-secondary)', padding: '2rem 0' }}>{isEn ? 'No projects yet. Create your first project!' : 'Chưa có dự án nào.'}</p>
           ) : (
-            <table className="admin-table">
+            <table className="admin-table projects-table">
               <thead>
                 <tr>
-                  <th>Order</th>
-                  <th>Name</th>
-                  <th>Description</th>
+                  <th>{isEn ? 'Order' : 'Thứ tự'}</th>
+                  <th>{isEn ? 'Name' : 'Tên'}</th>
+                  <th>{isEn ? 'Description' : 'Mô tả'}</th>
                   <th>Link</th>
-                  <th>Actions</th>
+                  <th>{isEn ? 'Actions' : 'Thao tác'}</th>
                 </tr>
               </thead>
               <tbody>

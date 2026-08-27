@@ -48,6 +48,21 @@
   margin-bottom: 3rem;
   overflow-x: auto;
   padding-bottom: 0.5rem;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.category-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.category-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.category-tabs::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
 }
 
 .tab-btn {
@@ -84,8 +99,9 @@
 }
 
 @media (max-width: 992px) {
+  /* Keep 3 columns on tablet to avoid odd gaps for 3 items, or scale down */
   .stories-grid {
-    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem; /* reduce gap to fit 3 items */
   }
 }
 
