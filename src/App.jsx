@@ -1,7 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import Navbar from './editorial/Header';
+import { EditorialFooter as Footer } from './editorial/StaticSections';
+import { SiteImages } from './editorial/SiteImages';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
 import StoriesPage from './pages/StoriesPage';
@@ -18,6 +19,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import './App.css';
+import './editorial/editorial.css';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -29,7 +31,7 @@ const Layout = ({ children }) => {
   }, [location.pathname]);
 
   return (
-    <div className="app-layout">
+    <div className={`app-layout ${isAdminRoute ? '' : 'editorial-site'}`}>
       {!isAdminRoute && <Navbar />}
       <main className="main-content">
         {children}
@@ -44,7 +46,7 @@ function App() {
     <LanguageProvider>
       <AuthProvider>
         <Router>
-          <Layout>
+          <SiteImages><Layout>
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
@@ -61,7 +63,7 @@ function App() {
               <Route path="/admin/comments" element={<AdminComments />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
             </Routes>
-          </Layout>
+          </Layout></SiteImages>
         </Router>
       </AuthProvider>
     </LanguageProvider>
