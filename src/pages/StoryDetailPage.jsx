@@ -124,6 +124,14 @@ const StoryDetailPage = () => {
   const useAlt = story.originalLang && story.originalLang !== language && story.titleAlt;
   const displayTitle = useAlt ? story.titleAlt : story.title;
   const displayContent = useAlt && story.contentAlt ? story.contentAlt : story.content;
+  const sanitizedContent = DOMPurify.sanitize(displayContent, {
+    ADD_TAGS: ['figure', 'figcaption'],
+    ADD_ATTR: ['class', 'alt'],
+    RETURN_DOM: true
+  });
+  if (String(story.id) === '90001') {
+    sanitizedContent.querySelector('img[src="https://res.cloudinary.com/d36z15vh/image/upload/v1787721290/vietnam-decoded/gv4u9lemkxhoh8tlvnb7.jpg"]')?.remove();
+  }
 
   return (
     <article className="story-detail-page fade-in">
@@ -156,10 +164,7 @@ const StoryDetailPage = () => {
 
         <div 
           className="story-content-body"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(displayContent, {
-            ADD_TAGS: ['figure', 'figcaption'],
-            ADD_ATTR: ['class', 'alt']
-          }) }}
+          dangerouslySetInnerHTML={{ __html: sanitizedContent.innerHTML }}
         />
 
         <div className="story-tags">
